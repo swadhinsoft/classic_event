@@ -4,7 +4,35 @@ const QRCode = require('qrcode');
 exports.handler = async (event) => {
   try {
     const { blockNo, flatNo, numTokens, email } = JSON.parse(event.body);
-    console.log("Form data received:", { blockNo, flatNo, numTokens, email });
+
+    if (!blockNo || !flatNo || !numTokens || !email) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Missing required fields' }) };
+    }
+
+    const qrImages = [];
+    const attachments = [];
+
+    for (let i = 0; i < numTokens; i++) {
+      const qrData = `Block: ${blockNo}, Flat: ${flatNo}, Token: ${i + 1}`;
+      const qrBuffer = await QRCode.toBuffer(qrData); // Get buffer for attachment
+      const filename = `token-${i + 1}.png`;
+
+      // Attachment
+      attachments.push({
+        filename,
+        content: qrBuffer
+      });
+
+      // For inline display (CID reference)
+      attachments.push({
+        filename: `inline-${filename}`,
+        content: qrBuffer,
+        cid: `qr${i}@tokens` // unique content ID
+      });
+
+      // Add to HTML with CID
+      qrImages.push(`<img src="cid:qr${i}@tokens" style="margin:5px"/>`);
+    }
 
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -16,29 +44,18 @@ exports.handler = async (event) => {
       }
     });
 
-    console.log("Attempting to send email...");
-
-    // Generate QR codes
-    let qrImages = [];
-    for (let i = 0; i < numTokens; i++) {
-      const qrData = `${blockNo}-${flatNo}-${Date.now()}-${i+1}`;
-      const qrImage = await QRCode.toDataURL(qrData);
-      qrImages.push(qrImage);
-    }
-
     await transporter.sendMail({
       from: `"Society QR" <${process.env.SMTP_USER}>`,
       to: email,
       cc: process.env.SMTP_USER,
       subject: 'Your QR Tokens',
-      html: `<p>Here are your QR codes:</p>${qrImages.map(src => `<img src="${src}"/>`).join('')}`
+      html: `<p>Here are your QR codes:</p>${qrImages.join('')}`,
+      attachments
     });
 
-    console.log("Email sent successfully!");
-    return { statusCode: 200, body: JSON.stringify({ message: "QR codes sent!" }) };
-
+    return { statusCode: 200, body: JSON.stringify({ message: 'QR codes sent successfully!' }) };
   } catch (error) {
-    console.error("Error occurred:", error);
-    return { statusCode: 500, body: JSON.stringify({ error: "Failed to send QR codes" }) };
+    console.error('Error sending email:', error);
+    return { statusCode: 500, body: JSON.stringify({ error: 'Failed to send QR codes' }) };
   }
 };
