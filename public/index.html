@@ -314,7 +314,7 @@
       // Open payment app via UPI link
       const upiLink = generateUpiLink(app, total.toFixed(2), flatNo, tokensSummary);
       qrFallbackDiv.style.display = "none";
-      window.location.href = upiLink;
+      window.open(upiLink, '_self');
 
       // Show fallback QR code if payment app doesn't open within 2 seconds
       setTimeout(() => {
