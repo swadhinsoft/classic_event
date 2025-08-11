@@ -1,6 +1,5 @@
 const nodemailer = require("nodemailer");
 const QRCode = require("qrcode");
-const { v4: uuidv4 } = require("uuid");
 
 const UPI_PA = "swadhinsoft-2@okaxis";
 
@@ -14,29 +13,41 @@ const transporter = nodemailer.createTransport({
 
 exports.handler = async function (event) {
   try {
+    console.log("Raw event body:", event.body);
     const data = JSON.parse(event.body);
+    console.log("Parsed data:", data);
 
-    const { block, flat, email, donation, day1Tokens, day2Tokens } = data;
+    const { block, flat, email, donation, day1Tokens, day2Tokens, day3Tokens } = data;
+    console.log({ block, flat, email, donation, day1Tokens, day2Tokens, day3Tokens });
+
     if (!block || !flat || !email) {
-      return { statusCode: 400, body: JSON.stringify({ success: false, error: "Missing required fields" }) };
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ success: false, error: "Missing required fields: block, flat, or email" }),
+      };
     }
 
     // Generate tokens array (for each token per day)
     const tokensList = [];
 
-    for (let i = 1; i <= day1Tokens; i++) {
+    for (let i = 1; i <= (day1Tokens || 0); i++) {
       tokensList.push({ day: "Day 1 (27th Aug)", tokenNo: i });
     }
-    for (let i = 1; i <= day2Tokens; i++) {
+    for (let i = 1; i <= (day2Tokens || 0); i++) {
       tokensList.push({ day: "Day 2 (28th Aug)", tokenNo: i });
+    }
+    for (let i = 1; i <= (day3Tokens || 0); i++) {
+      tokensList.push({ day: "Day 3 (29th Aug)", tokenNo: i });
     }
 
     // Generate QR code images (base64)
-    const qrImages = await Promise.all(tokensList.map(async ({ day, tokenNo }) => {
-      const text = `Flat: ${block}-${flat} | ${day} Token-${tokenNo} | UPI: ${UPI_PA}`;
-      const dataUrl = await QRCode.toDataURL(text);
-      return { day, tokenNo, dataUrl };
-    }));
+    const qrImages = await Promise.all(
+      tokensList.map(async ({ day, tokenNo }) => {
+        const text = `Flat: ${block}-${flat} | ${day} Token-${tokenNo} | UPI: ${UPI_PA}`;
+        const dataUrl = await QRCode.toDataURL(text);
+        return { day, tokenNo, dataUrl };
+      })
+    );
 
     // Compose HTML email content
     let htmlContent = `<h2>Thank you for your contribution!</h2>`;
