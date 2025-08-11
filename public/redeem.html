@@ -19,48 +19,32 @@
 <div id="result"></div>
 
 <script>
-    let redeemedTokens = new Set();
+    function onScanSuccess(decodedText) {
+   html5QrcodeScanner.clear();
+   document.getElementById('result').textContent = "Checking token...";
 
-    function onScanSuccess(decodedText, decodedResult) {
-      if (redeemedTokens.has(decodedText)) {
-        document.getElementById('result').innerHTML = `<p style="color:red;">Token already redeemed!</p>`;
-        return;
-      }
+   fetch('/.netlify/functions/redeem-token', {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({ tokenID: decodedText })
+   })
+   .then(res => res.text().then(text => ({ ok: res.ok, text })))
+   .then(({ ok, text }) => {
+     document.getElementById('result').innerHTML = ok
+       ? `<span class="success">✅ ${text}</span>`
+       : `<span class="error">❌ ${text}</span>`;
+     setTimeout(() => {
+       html5QrcodeScanner.render(onScanSuccess, onScanError);
+     }, 2000);
+   })
+   .catch(err => {
+     document.getElementById('result').innerHTML = `<span class="error">Error: ${err.message}</span>`;
+     setTimeout(() => {
+       html5QrcodeScanner.render(onScanSuccess, onScanError);
+     }, 2000);
+   });
+ }
 
-      document.getElementById('result').innerHTML = `
-        <p><strong>Scanned Token:</strong> ${decodedText}</p>
-        <button id="redeemBtn">Redeem Token</button>
-        <p id="redeemStatus"></p>
-      `;
-
-      document.getElementById('redeemBtn').onclick = async () => {
-        try {
-          const res = await fetch('/.netlify/functions/redeem-token', {
-            method: 'POST',
-            body: JSON.stringify({ token: decodedText }),
-            headers: { 'Content-Type': 'application/json' }
-          });
-          if (res.ok) {
-            redeemedTokens.add(decodedText);
-            document.getElementById('redeemStatus').textContent = "Token redeemed successfully ✅";
-            document.getElementById('redeemBtn').disabled = true;
-          } else {
-            const msg = await res.text();
-            document.getElementById('redeemStatus').textContent = "Error: " + msg;
-          }
-        } catch (e) {
-          document.getElementById('redeemStatus').textContent = "Error: " + e.message;
-        }
-      };
-    }
-
-    function onScanError(errorMessage) {
-      // Optional: handle scan errors
-    }
-
-    var html5QrcodeScanner = new Html5QrcodeScanner(
-      "reader", { fps: 10, qrbox: 250 });
-    html5QrcodeScanner.render(onScanSuccess, onScanError);
 </script>
 
 </body>
