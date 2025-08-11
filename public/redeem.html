@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Organizer Token Redemption</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+        #reader { width: 100%; }
+        #result { margin-top: 1rem; }
+        button { padding: 10px 15px; font-size: 1rem; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+<h2>Scan Token QR Code for Redemption</h2>
+
+<div id="reader"></div>
+
+<div id="result"></div>
+
+<script>
+    let redeemedTokens = new Set();
+
+    function onScanSuccess(decodedText, decodedResult) {
+      if (redeemedTokens.has(decodedText)) {
+        document.getElementById('result').innerHTML = `<p style="color:red;">Token already redeemed!</p>`;
+        return;
+      }
+
+      document.getElementById('result').innerHTML = `
+        <p><strong>Scanned Token:</strong> ${decodedText}</p>
+        <button id="redeemBtn">Redeem Token</button>
+        <p id="redeemStatus"></p>
+      `;
+
+      document.getElementById('redeemBtn').onclick = async () => {
+        try {
+          const res = await fetch('/.netlify/functions/redeem-token', {
+            method: 'POST',
+            body: JSON.stringify({ token: decodedText }),
+            headers: { 'Content-Type': 'application/json' }
+          });
+          if (res.ok) {
+            redeemedTokens.add(decodedText);
+            document.getElementById('redeemStatus').textContent = "Token redeemed successfully ✅";
+            document.getElementById('redeemBtn').disabled = true;
+          } else {
+            const msg = await res.text();
+            document.getElementById('redeemStatus').textContent = "Error: " + msg;
+          }
+        } catch (e) {
+          document.getElementById('redeemStatus').textContent = "Error: " + e.message;
+        }
+      };
+    }
+
+    function onScanError(errorMessage) {
+      // Optional: handle scan errors
+    }
+
+    var html5QrcodeScanner = new Html5QrcodeScanner(
+      "reader", { fps: 10, qrbox: 250 });
+    html5QrcodeScanner.render(onScanSuccess, onScanError);
+</script>
+
+</body>
+</html>
