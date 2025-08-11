@@ -1,293 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Ganesh Puja 2025 - Token Booking</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ganesh Puja 2025 Token Donation</title>
     <style>
-        body { font-family: Arial, sans-serif; background:#fff8f0; margin:0; padding:0; }
-        header { background:#d62828; color:#fff; padding:18px 10px; text-align:center; }
-        header img { max-width:120px; display:block; margin:0 auto 8px; }
-        main { max-width:720px; margin:18px auto; background:#fff; padding:18px; border-radius:8px; box-shadow:0 8px 20px rgba(0,0,0,0.06); }
-        h1 { margin:6px 0; color:#d62828; }
-        .row { display:flex; gap:12px; align-items:center; }
-        label { font-weight:600; display:block; margin-top:12px; color:#333; }
-        input[type="number"], input[type="email"], select { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; }
-        .small { font-size:13px; color:#555; margin-top:6px; }
-        .day-card { padding:12px; border:1px dashed #e6e6e6; border-radius:6px; margin-top:8px; }
-        .controls { display:flex; gap:12px; margin-top:14px; }
-        button { padding:10px 14px; border-radius:8px; border:none; cursor:pointer; background:#d62828; color:#fff; font-weight:700;}
-        button.secondary { background:#444; }
-        #result { margin-top:12px; font-weight:700; text-align:center; }
-        .qr-grid { display:flex; flex-wrap:wrap; gap:12px; margin-top:12px; justify-content:center; }
-        .qr-item { text-align:center; border:1px solid #eee; padding:8px; border-radius:8px; background:#fff; }
-        footer.note { margin-top:18px; background:#f4f4f4; padding:14px; border-radius:6px; font-size:14px; color:#333;}
+        body { font-family: Arial, sans-serif; max-width: 480px; margin: 20px auto; padding: 10px; }
+        label { display: block; margin-top: 15px; }
+        input, select, button { padding: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; }
+        fieldset { margin-top: 20px; }
+        #totalAmount { font-weight: bold; margin-top: 10px; }
+        #qrFallback { margin-top: 20px; display: none; text-align: center; }
+        footer { font-size: 0.8rem; color: #666; margin-top: 40px; text-align: center; }
     </style>
 </head>
 <body>
-<header>
-    <img src="https://astromanch.com/public/storage/images/blog_2341754464197.webp" alt="Ganesh Banner">
-    <h1>Ganesh Puja 2025</h1>
-    <div class="small">Food Token Booking & Donation</div>
-</header>
+<h1>Ganesh Puja 2025 Food Token Donation</h1>
 
-<main>
-    <h2>Book Tokens & Donate</h2>
+<form id="tokenForm">
+    <label>
+        Block No:
+        <select id="blockNo" required>
+            <option value="">Select</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+        </select>
+    </label>
 
-    <form id="bookingForm">
-        <!-- Hidden event title used by backend -->
-        <input type="hidden" name="eventName" value="Ganesh Puja 2025">
+    <label>
+        Flat No:
+        <input type="number" id="flatNo" min="1" required />
+    </label>
 
-        <div class="row">
-            <div style="flex:1">
-                <label>Block No</label>
-                <select name="blockNo" required>
-                    <option value="">Select</option>
-                    <option value="A1">A1</option>
-                    <option value="A2">A2</option>
-                    <option value="B1">B1</option>
-                    <option value="B2">B2</option>
-                </select>
-            </div>
+    <label>
+        Email:
+        <input type="email" id="email" required />
+    </label>
 
-            <div style="width:140px">
-                <label>Flat No</label>
-                <input name="flatNo" type="text" placeholder="e.g. 104" required>
-            </div>
-        </div>
+    <label>
+        Donation Amount (Min ₹750):
+        <input type="number" id="donation" min="750" value="750" />
+    </label>
+    <small>This contribution will be used towards the event only.</small>
 
-        <label style="margin-top:14px;">Donation (default per-flat)</label>
-        <div class="row">
-            <div style="flex:1">
-                <input type="number" id="baseDonation" value="750" readonly>
-                <div class="small">Minimum donation per flat: ₹750</div>
-            </div>
-            <div style="width:160px">
-                <label style="font-weight:600; font-size:13px;">Extra Donation (optional)</label>
-                <input type="number" id="extraDonation" name="extraDonation" value="0" min="0" />
-            </div>
-        </div>
-        <div class="small" style="margin-top:6px;">This contribution will be used towards the Ganesh Puja 2025 event only.</div>
+    <fieldset>
+        <legend>Day-wise Token Selection</legend>
 
-        <hr style="margin:14px 0; border:none; border-top:1px solid #eee;">
+        <label>
+            Day 1 (27th Aug) @ ₹125 per token:
+            <input type="number" id="day1Tokens" min="0" value="0" />
+        </label>
 
-        <label>Select Days & Tokens (Day-wise prices)</label>
+        <label>
+            Day 2 (28th Aug) @ ₹150 per token:
+            <input type="number" id="day2Tokens" min="0" value="0" />
+        </label>
+    </fieldset>
 
-        <!-- days configuration (you can add/remove days in code) -->
-        <div id="daysContainer">
-            <!-- Day 1 -->
-            <div class="day-card">
-                <label><input type="checkbox" class="day-enable" data-day="1"> Day 1 — 27 Aug | ₹125 per head</label>
-                <div class="row" style="margin-top:8px;">
-                    <div style="flex:1">
-                        <input type="number" class="day-tokens" data-day="1" name="day1Tokens" min="0" value="0" disabled>
-                        <div class="small">Enter number of tokens for Day 1</div>
-                    </div>
-                </div>
-            </div>
+    <div id="totalAmount">Total Amount: ₹750</div>
 
-            <!-- Day 2 -->
-            <div class="day-card">
-                <label><input type="checkbox" class="day-enable" data-day="2"> Day 2 — 28 Aug | ₹150 per head</label>
-                <div class="row" style="margin-top:8px;">
-                    <div style="flex:1">
-                        <input type="number" class="day-tokens" data-day="2" name="day2Tokens" min="0" value="0" disabled>
-                        <div class="small">Enter number of tokens for Day 2</div>
-                    </div>
-                </div>
-            </div>
+    <button type="button" id="payPhonePe">Pay with PhonePe</button>
+    <button type="button" id="payGPay">Pay with GPay</button>
 
-            <!-- Day 3 -->
-            <div class="day-card">
-                <label><input type="checkbox" class="day-enable" data-day="3"> Day 3 — 29 Aug | ₹175 per head</label>
-                <div class="row" style="margin-top:8px;">
-                    <div style="flex:1">
-                        <input type="number" class="day-tokens" data-day="3" name="day3Tokens" min="0" value="0" disabled>
-                        <div class="small">Enter number of tokens for Day 3</div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div id="qrFallback">
+        <p>If payment app doesn’t open, scan this QR code with your UPI app:</p>
+        <canvas id="qrCanvas"></canvas>
+    </div>
+</form>
 
-        <div style="margin-top:12px;">
-            <label><input type="checkbox" id="selectAllDays"> Select All Days (set tokens to 1)</label>
-        </div>
+<footer>
+    QR code will be sent to your email ID, required for claim at event.<br/>
+    Each claim reduces your token count accordingly.
+</footer>
 
-        <hr style="margin:14px 0; border:none; border-top:1px solid #eee;">
-
-        <div style="display:flex; gap:12px; align-items:center;">
-            <div style="flex:1;">
-                <label>Total Payable (live)</label>
-                <div id="totalDisplay" style="font-size:20px; font-weight:700; margin-top:6px;">₹0</div>
-                <div class="small">Payment note will include flat no & selected tokens for organiser matching.</div>
-            </div>
-            <div style="width:240px;">
-                <label>Email (for communication)</label>
-                <input type="email" name="email" required placeholder="resident@example.com">
-            </div>
-        </div>
-
-        <div class="controls">
-            <button id="submitBtn" type="submit">Submit & Generate Tokens</button>
-            <button class="secondary" id="payNowBtn" type="button" style="display:none;">Pay Now (UPI)</button>
-        </div>
-
-        <div id="result"></div>
-
-        <div id="qrPreview" class="qr-grid"></div>
-
-        <footer class="note">
-            <strong>Note:</strong> The QR code will be sent to the organiser for verification first. The QR is required to be scanned at the time of claim. If you are not comfortable showing the QR, you may state your flat number instead. Each claim will reduce your available token count. <br><br>
-            Regards, <strong>Oceanus Classic Event Management Team</strong>
-        </footer>
-    </form>
-</main>
-
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
-    // Day prices — MUST match backend config
-    const dayPrices = { 1: 125, 2: 150, 3: 175 };
-    const baseDonationEl = document.getElementById('baseDonation');
-    const extraDonationEl = document.getElementById('extraDonation');
-    const totalDisplay = document.getElementById('totalDisplay');
-    const selectAllDays = document.getElementById('selectAllDays');
-    const payNowBtn = document.getElementById('payNowBtn');
-    const submitBtn = document.getElementById('submitBtn');
+    const DAY1_PRICE = 125;
+    const DAY2_PRICE = 150;
+    const UPI_PA = "swadhinsoft-2@okaxis";
+    const UPI_PN = "Swadhin Acharya";
 
-    function calcTotal() {
-      const base = Number(baseDonationEl.value || 0);
-      const extra = Number(extraDonationEl.value || 0);
-      let tokensTotal = 0;
-      document.querySelectorAll('.day-tokens').forEach(el => {
-        const day = el.dataset.day;
-        const n = Number(el.value || 0);
-        tokensTotal += n * (dayPrices[day] || 0);
-      });
-      const total = base + extra + tokensTotal;
-      totalDisplay.innerText = '₹' + total;
-      return { total, base, extra, tokensTotal };
+    const blockEl = document.getElementById("blockNo");
+    const flatEl = document.getElementById("flatNo");
+    const emailEl = document.getElementById("email");
+    const donationEl = document.getElementById("donation");
+    const day1TokensEl = document.getElementById("day1Tokens");
+    const day2TokensEl = document.getElementById("day2Tokens");
+    const totalAmountEl = document.getElementById("totalAmount");
+
+    const payPhonePeBtn = document.getElementById("payPhonePe");
+    const payGPayBtn = document.getElementById("payGPay");
+
+    const qrFallbackDiv = document.getElementById("qrFallback");
+    const qrCanvas = document.getElementById("qrCanvas");
+
+    function calculateTotal() {
+      const donation = Number(donationEl.value) || 0;
+      const day1Tokens = Number(day1TokensEl.value) || 0;
+      const day2Tokens = Number(day2TokensEl.value) || 0;
+
+      const totalTokensCost = day1Tokens * DAY1_PRICE + day2Tokens * DAY2_PRICE;
+      const total = donation + totalTokensCost;
+
+      totalAmountEl.textContent = `Total Amount: ₹${total.toFixed(2)}`;
+      return total;
     }
 
-    // day enable/disable handlers
-    document.querySelectorAll('.day-enable').forEach(ch => {
-      ch.addEventListener('change', function() {
-        const day = this.dataset.day;
-        const tokensEl = document.querySelector('.day-tokens[data-day="'+day+'"]');
-        if (this.checked) {
-          tokensEl.disabled = false;
-          if (tokensEl.value === '0') tokensEl.value = 1;
-        } else {
-          tokensEl.disabled = true;
-          tokensEl.value = 0;
-        }
-        calcTotal();
-      });
-    });
-
-    document.querySelectorAll('.day-tokens').forEach(el => {
-      el.addEventListener('input', calcTotal);
-    });
-    extraDonationEl.addEventListener('input', calcTotal);
-
-    selectAllDays.addEventListener('change', function() {
-      const checked = this.checked;
-      document.querySelectorAll('.day-enable').forEach(ch => {
-        ch.checked = checked;
-        const day = ch.dataset.day;
-        const tokensEl = document.querySelector('.day-tokens[data-day="'+day+'"]');
-        tokensEl.disabled = !checked;
-        tokensEl.value = checked ? (tokensEl.value === '0' ? 1 : tokensEl.value) : 0;
-      });
-      calcTotal();
-    });
-
-    // build UPI link
-    function makeUpiLink(pa, pn, amount, note) {
-      // return a universal deep link (apps will handle it)
-      const params = new URLSearchParams({
-        pa, pn, am: String(amount), cu: 'INR', tn: note
-      });
-      return 'upi://pay?' + params.toString();
+    function encodeNote(flat, tokensSummary) {
+      return encodeURIComponent(`Ganesh Puja 2025 | Flat: ${flat} | ${tokensSummary}`);
     }
 
-    // initial calc
-    calcTotal();
+    function generateUpiLink(app, amount, flat, tokensSummary) {
+      const baseParams = `pa=${UPI_PA}&pn=${encodeURIComponent(UPI_PN)}&am=${amount}&cu=INR&tn=${encodeNote(flat, tokensSummary)}`;
+      switch (app) {
+        case "phonepe":
+          return `phonepe://pay?${baseParams}`;
+        case "gpay":
+          return `gpay://upi/pay?${baseParams}`;
+        default:
+          return `upi://pay?${baseParams}`;
+      }
+    }
 
-    // form submission
-    document.getElementById('bookingForm').addEventListener('submit', async function(e) {
-      e.preventDefault();
-      submitBtn.disabled = true;
-      submitBtn.innerText = 'Generating tokens...';
+    function generateTokensSummary(day1Tokens, day2Tokens) {
+      return `Day1:${day1Tokens} tokens, Day2:${day2Tokens} tokens`;
+    }
 
-      // collect data
-      const form = new FormData(this);
-      const payload = {
-        eventName: form.get('eventName'),
-        blockNo: form.get('blockNo'),
-        flatNo: form.get('flatNo'),
-        email: form.get('email'),
-        baseDonation: Number(form.get('baseDonation') || baseDonationEl.value || 0),
-        extraDonation: Number(form.get('extraDonation') || extraDonationEl.value || 0),
-        days: {}
-      };
-      // per-day tokens
-      for (const dayKey of Object.keys(dayPrices)) {
-        const tokens = Number(document.querySelector('.day-tokens[data-day="'+dayKey+'"]').value || 0);
-        if (tokens > 0) payload.days[dayKey] = tokens;
+    function handlePay(app) {
+      const block = blockEl.value;
+      const flat = flatEl.value;
+      const email = emailEl.value;
+      if (!block || !flat || !email) {
+        alert("Please fill all required fields (Block, Flat, Email)");
+        return;
+      }
+      const donation = Number(donationEl.value) || 0;
+      if (donation < 750) {
+        alert("Minimum donation is ₹750");
+        return;
+      }
+      const day1Tokens = Number(day1TokensEl.value) || 0;
+      const day2Tokens = Number(day2TokensEl.value) || 0;
+      if (day1Tokens + day2Tokens === 0) {
+        alert("Please select at least one token for any day");
+        return;
       }
 
-      // total
-      const calc = calcTotal();
-      payload.totalAmount = calc.total;
+      const flatNo = `${block}-${flat}`;
+      const tokensSummary = generateTokensSummary(day1Tokens, day2Tokens);
+      const total = donation + day1Tokens * DAY1_PRICE + day2Tokens * DAY2_PRICE;
 
-      // build payment note (include flat and token summary)
-      const tokenSummaries = Object.entries(payload.days).map(([d, n]) => `Day${d}:${n}`).join('; ');
-      const payNote = `${payload.eventName} Token | Flat:${payload.blockNo}-${payload.flatNo} | ${tokenSummaries}`;
-      payload.paymentNote = payNote;
+      // Open payment app
+      const upiLink = generateUpiLink(app, total.toFixed(2), flatNo, tokensSummary);
+      qrFallbackDiv.style.display = "none";
+      window.location.href = upiLink;
+
+      // Show fallback QR if app not opening
+      setTimeout(() => {
+        qrFallbackDiv.style.display = "block";
+        QRCode.toCanvas(qrCanvas, generateUpiLink(null, total.toFixed(2), flatNo, tokensSummary), function (error) {
+          if (error) console.error(error);
+        });
+      }, 2000);
+    }
+
+    // Calculate total on input change
+    donationEl.addEventListener("input", calculateTotal);
+    day1TokensEl.addEventListener("input", calculateTotal);
+    day2TokensEl.addEventListener("input", calculateTotal);
+
+    payPhonePeBtn.addEventListener("click", () => handlePay("phonepe"));
+    payGPayBtn.addEventListener("click", () => handlePay("gpay"));
+
+    calculateTotal();
+
+    // Form submit (send data to backend to generate and email tokens)
+    document.getElementById("tokenForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const data = {
+        block: blockEl.value,
+        flat: flatEl.value,
+        email: emailEl.value,
+        donation: Number(donationEl.value),
+        day1Tokens: Number(day1TokensEl.value),
+        day2Tokens: Number(day2TokensEl.value),
+      };
+
+      // Validate minimums again
+      if (!data.block || !data.flat || !data.email) {
+        alert("Fill all required fields!");
+        return;
+      }
+      if (data.donation < 750) {
+        alert("Donation must be at least ₹750");
+        return;
+      }
+      if (data.day1Tokens + data.day2Tokens === 0) {
+        alert("Select at least one token");
+        return;
+      }
 
       try {
-        const resp = await fetch('/.netlify/functions/generate-tokens', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+        const res = await fetch("/.netlify/functions/sendTokens", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
         });
-        const data = await resp.json();
-
-        if (!resp.ok) {
-          document.getElementById('result').innerText = 'Error: ' + (data.error || 'Failed to generate tokens');
-          submitBtn.disabled = false;
-          submitBtn.innerText = 'Submit & Generate Tokens';
-          return;
+        const json = await res.json();
+        if (json.success) {
+          alert("Tokens emailed successfully!");
+        } else {
+          alert("Error sending tokens: " + json.error);
         }
-
-        document.getElementById('result').innerText = 'Tokens generated and emailed to organiser for verification. Preview shown below.';
-        // show preview images if returned
-        const preview = document.getElementById('qrPreview');
-        preview.innerHTML = '';
-        if (data.qrPreviews && data.qrPreviews.length) {
-          data.qrPreviews.forEach(item => {
-            const div = document.createElement('div');
-            div.className = 'qr-item';
-            div.innerHTML = `<div style="font-weight:700;margin-bottom:6px">${item.label}</div><img src="${item.dataUrl}" width="150"><div style="font-size:12px;margin-top:6px">${item.tokenId}</div>`;
-            preview.appendChild(div);
-          });
-        }
-
-        // show Pay Now button (UPI); user still needs to complete payment manually
-        const upiId = encodeURIComponent(window.UPI_ACCOUNT || 'swadhinsoft-2@okaxis'); // set window.UPI_ACCOUNT if needed
-        const upiName = encodeURIComponent('Swadhin Acharya');
-        const upiLink = makeUpiLink('swadhinsoft-2@okaxis', 'Swadhin Acharya', calc.total, payNote);
-        payNowBtn.style.display = 'inline-block';
-        payNowBtn.onclick = function() {
-          // open UPI app (mobile). On desktop this may not work.
-          window.location.href = upiLink;
-        };
-
       } catch (err) {
-        console.error(err);
-        document.getElementById('result').innerText = 'Error submitting form';
-      } finally {
-        submitBtn.disabled = false;
-        submitBtn.innerText = 'Submit & Generate Tokens';
+        alert("Error: " + err.message);
       }
     });
 </script>
