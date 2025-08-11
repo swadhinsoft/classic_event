@@ -1,36 +1,52 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Society QR Token</title>
-</head>
-<body>
-<h1>QR Token Request</h1>
-<form id="tokenForm">
-    <label>Block No:
-        <select name="block" required>
-            <option value="">Select</option>
-            <option value="A1">A1</option>
-            <option value="A2">A2</option>
-            <option value="B1">B1</option>
-            <option value="B2">B2</option>
-        </select>
-    </label><br><br>
-    <label>Flat No:
-        <input type="number" name="flat" required />
-    </label><br><br>
-    <label>Number of Tokens:
-        <input type="number" name="tokens" min="1" required />
-    </label><br><br>
-    <label>Email:
-        <input type="email" name="email" required />
-    </label><br><br>
-    <button type="submit">Submit</button>
-</form>
 
-<div id="result"></div>
+            <form id="qrForm">
+                <label>Block No:</label>
+                <select name="blockNo" required>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                </select><br><br>
 
-<script src="form.js"></script>
-</body>
-</html>
+                <label>Flat No:</label>
+                <input type="number" name="flatNo" required><br><br>
+
+                <label>Number of Tokens:</label>
+                <input type="number" name="numTokens" min="1" required><br><br>
+
+                <label>Email:</label>
+                <input type="email" name="email" required><br><br>
+
+                <button type="submit">Submit</button>
+            </form>
+
+            <div id="result"></div>
+
+            <script>
+                document.getElementById('qrForm').addEventListener('submit', async function(e) {
+                  e.preventDefault();
+
+                  const formData = {
+                    blockNo: e.target.blockNo.value,
+                    flatNo: e.target.flatNo.value,
+                    numTokens: e.target.numTokens.value,
+                    email: e.target.email.value
+                  };
+
+                  document.getElementById('result').innerText = 'Sending...';
+
+                  const res = await fetch('/.netlify/functions/generate-tokens', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                  });
+
+                  const data = await res.json();
+
+                  if (res.ok) {
+                    document.getElementById('result').innerText = 'QR codes sent to your email!';
+                  } else {
+                    document.getElementById('result').innerText = 'Error: ' + data.error;
+                  }
+                });
+            </script>
