@@ -3,18 +3,121 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Ganesh Puja 2025 Token Donation</title>
+    <title>Ganesh Puja 2025 Food Token Donation</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 480px; margin: 20px auto; padding: 10px; }
-        label { display: block; margin-top: 15px; }
-        input, select, button { padding: 8px; font-size: 1rem; width: 100%; box-sizing: border-box; }
-        fieldset { margin-top: 20px; }
-        #totalAmount { font-weight: bold; margin-top: 10px; }
-        #qrFallback { margin-top: 20px; display: none; text-align: center; }
-        footer { font-size: 0.8rem; color: #666; margin-top: 40px; text-align: center; }
+        body {
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          max-width: 480px;
+          margin: 20px auto;
+          padding: 15px;
+          background: #fff8f0;
+          color: #333;
+          border-radius: 8px;
+          box-shadow: 0 0 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+          text-align: center;
+          color: #d35400;
+          margin-bottom: 20px;
+          font-weight: 700;
+        }
+        label {
+          display: block;
+          margin-top: 15px;
+          font-weight: 600;
+          color: #5d4037;
+        }
+        select, input[type=number], input[type=email] {
+          padding: 10px;
+          font-size: 1rem;
+          width: 100%;
+          border: 2px solid #d35400;
+          border-radius: 6px;
+          margin-top: 5px;
+          box-sizing: border-box;
+        }
+        small {
+          font-size: 0.85rem;
+          color: #7d6e68;
+        }
+        fieldset {
+          margin-top: 20px;
+          border: 2px solid #d35400;
+          border-radius: 8px;
+          padding: 15px;
+          background: #fff3e0;
+        }
+        legend {
+          font-weight: 700;
+          color: #bf360c;
+          padding: 0 10px;
+        }
+        #totalAmount {
+          margin-top: 15px;
+          font-weight: 700;
+          font-size: 1.1rem;
+          color: #e65100;
+        }
+        button {
+          cursor: pointer;
+          font-size: 1rem;
+          padding: 12px;
+          margin-top: 20px;
+          width: 48%;
+          border-radius: 6px;
+          border: none;
+          color: white;
+          font-weight: 700;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          transition: background-color 0.3s ease;
+        }
+        #payPhonePe {
+          background-color: #3cba54;
+        }
+        #payPhonePe:hover {
+          background-color: #2a7d39;
+        }
+        #payGPay {
+          background-color: #4285f4;
+        }
+        #payGPay:hover {
+          background-color: #2a5abf;
+        }
+        #qrFallback {
+          margin-top: 30px;
+          text-align: center;
+          display: none;
+        }
+        #qrFallback p {
+          font-style: italic;
+          color: #795548;
+        }
+        footer {
+          font-size: 0.85rem;
+          color: #6d4c41;
+          margin-top: 40px;
+          text-align: center;
+          border-top: 1px solid #d7ccc8;
+          padding-top: 10px;
+        }
+        /* Banner */
+        .banner {
+          width: 100%;
+          height: 120px;
+          background-image: url('https://astromanch.com/public/storage/images/blog_2341754464197.webp');
+          background-size: cover;
+          background-position: center;
+          border-radius: 8px;
+          margin-bottom: 25px;
+        }
     </style>
 </head>
 <body>
+<div class="banner" aria-label="Ganesh Puja 2025 banner"></div>
+
 <h1>Ganesh Puja 2025 Food Token Donation</h1>
 
 <form id="tokenForm">
@@ -52,17 +155,32 @@
             Day 1 (27th Aug) @ ₹125 per token:
             <input type="number" id="day1Tokens" min="0" value="0" />
         </label>
+        <small><em>Poori, Chole, Sooji Halwa (Satwik Food: All W/O Onion & Garlic)</em></small>
 
         <label>
-            Day 2 (28th Aug) @ ₹150 per token:
+            Day 2 (28th Aug) @ ₹115 per token:
             <input type="number" id="day2Tokens" min="0" value="0" />
         </label>
+        <small><em>Lemon Rice, Sabji, Papad (Satwik Food: All W/O Onion & Garlic)</em></small>
+
+        <label>
+            Day 3 (29th Aug) @ ₹325 per token:
+            <input type="number" id="day3Tokens" min="0" value="0" />
+        </label>
+        <small><em>Veg Cutlet/Aloo Tikki, Puri, Chole, Kadhai Paneer, Veg pulav/Jeera Rice, Dal Tadka, Sweet, Kheer/moong dal halwa, Fryums/pickle (Satwik Food: All W/O Onion & Garlic)</em></small>
     </fieldset>
 
-    <div id="totalAmount">Total Amount: ₹750</div>
 
-    <button type="button" id="payPhonePe">Pay with PhonePe</button>
-    <button type="button" id="payGPay">Pay with GPay</button>
+    <div id="totalAmount">Total Amount: ₹750.00</div>
+
+    <button type="button" id="payPhonePe" title="Pay with PhonePe">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/1/1f/PhonePe_Logo.png" alt="PhonePe Logo" width="24" height="24" />
+        Pay with PhonePe
+    </button>
+    <button type="button" id="payGPay" title="Pay with Google Pay">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Pay Logo" width="24" height="24" />
+        Pay with GPay
+    </button>
 
     <div id="qrFallback">
         <p>If payment app doesn’t open, scan this QR code with your UPI app:</p>
@@ -71,14 +189,16 @@
 </form>
 
 <footer>
-    QR code will be sent to your email ID, required for claim at event.<br/>
+    QR code will be sent to your email ID, required for claim at event.<br />
     Each claim reduces your token count accordingly.
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
     const DAY1_PRICE = 125;
-    const DAY2_PRICE = 150;
+const DAY2_PRICE = 115;
+const DAY3_PRICE = 325;
+
     const UPI_PA = "swadhinsoft-2@okaxis";
     const UPI_PN = "Swadhin Acharya";
 
@@ -88,6 +208,7 @@
     const donationEl = document.getElementById("donation");
     const day1TokensEl = document.getElementById("day1Tokens");
     const day2TokensEl = document.getElementById("day2Tokens");
+    const day3TokensEl = document.getElementById("day3Tokens");
     const totalAmountEl = document.getElementById("totalAmount");
 
     const payPhonePeBtn = document.getElementById("payPhonePe");
@@ -100,8 +221,12 @@
       const donation = Number(donationEl.value) || 0;
       const day1Tokens = Number(day1TokensEl.value) || 0;
       const day2Tokens = Number(day2TokensEl.value) || 0;
+      const day3Tokens = Number(day3TokensEl.value) || 0;
 
-      const totalTokensCost = day1Tokens * DAY1_PRICE + day2Tokens * DAY2_PRICE;
+      const totalTokensCost =
+      day1Tokens * DAY1_PRICE +
+      day2Tokens * DAY2_PRICE +
+      day3Tokens * DAY3_PRICE;
       const total = donation + totalTokensCost;
 
       totalAmountEl.textContent = `Total Amount: ₹${total.toFixed(2)}`;
@@ -124,9 +249,9 @@
       }
     }
 
-    function generateTokensSummary(day1Tokens, day2Tokens) {
-      return `Day1:${day1Tokens} tokens, Day2:${day2Tokens} tokens`;
-    }
+    function generateTokensSummary(day1Tokens, day2Tokens, day3Tokens) {
+  return `Day1:${day1Tokens} tokens, Day2:${day2Tokens} tokens, Day3:${day3Tokens} tokens`;
+}
 
     function handlePay(app) {
       const block = blockEl.value;
@@ -143,14 +268,16 @@
       }
       const day1Tokens = Number(day1TokensEl.value) || 0;
       const day2Tokens = Number(day2TokensEl.value) || 0;
-      if (day1Tokens + day2Tokens === 0) {
+      const day3Tokens = Number(day3TokensEl.value) || 0;
+
+      if (day1Tokens + day2Tokens + day3Tokens === 0) {
         alert("Please select at least one token for any day");
         return;
       }
 
       const flatNo = `${block}-${flat}`;
-      const tokensSummary = generateTokensSummary(day1Tokens, day2Tokens);
-      const total = donation + day1Tokens * DAY1_PRICE + day2Tokens * DAY2_PRICE;
+  const tokensSummary = generateTokensSummary(day1Tokens, day2Tokens, day3Tokens);
+  const total = donation + day1Tokens * DAY1_PRICE + day2Tokens * DAY2_PRICE + day3Tokens * DAY3_PRICE;
 
       // Open payment app
       const upiLink = generateUpiLink(app, total.toFixed(2), flatNo, tokensSummary);
@@ -170,55 +297,19 @@
     donationEl.addEventListener("input", calculateTotal);
     day1TokensEl.addEventListener("input", calculateTotal);
     day2TokensEl.addEventListener("input", calculateTotal);
+    day3TokensEl.addEventListener("input", calculateTotal);
+    donationEl.addEventListener("blur", () => {
+  let val = Number(donationEl.value);
+  if (val < 750 || isNaN(val)) {
+    donationEl.value = 750;
+  }
+  calculateTotal();
+});
 
     payPhonePeBtn.addEventListener("click", () => handlePay("phonepe"));
     payGPayBtn.addEventListener("click", () => handlePay("gpay"));
 
     calculateTotal();
-
-    // Form submit (send data to backend to generate and email tokens)
-    document.getElementById("tokenForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const data = {
-        block: blockEl.value,
-        flat: flatEl.value,
-        email: emailEl.value,
-        donation: Number(donationEl.value),
-        day1Tokens: Number(day1TokensEl.value),
-        day2Tokens: Number(day2TokensEl.value),
-      };
-
-      // Validate minimums again
-      if (!data.block || !data.flat || !data.email) {
-        alert("Fill all required fields!");
-        return;
-      }
-      if (data.donation < 750) {
-        alert("Donation must be at least ₹750");
-        return;
-      }
-      if (data.day1Tokens + data.day2Tokens === 0) {
-        alert("Select at least one token");
-        return;
-      }
-
-      try {
-        const res = await fetch("/.netlify/functions/sendTokens", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data),
-        });
-        const json = await res.json();
-        if (json.success) {
-          alert("Tokens emailed successfully!");
-        } else {
-          alert("Error sending tokens: " + json.error);
-        }
-      } catch (err) {
-        alert("Error: " + err.message);
-      }
-    });
 </script>
 </body>
 </html>
