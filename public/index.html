@@ -316,23 +316,21 @@ return;
 }
 
 const upiLink = generateUpiLink(app, total.toFixed(2), flatNo, tokensSummary);
-console.log("Redirecting to UPI link:", upiLink);
+console.log("Opening UPI link:", upiLink);
 
 qrFallbackDiv.style.display = "none";
 
-// Add small delay to avoid blocking redirect
-setTimeout(() => {
-window.location.href = upiLink;
-}, 500);
+// Try window.open to trigger app
+window.open(upiLink);
 
-// Show fallback QR code if payment app doesn't open within 2 seconds
+// Optional: fallback QR code can show after 3-4 seconds if app not opened
 setTimeout(() => {
-qrFallbackDiv.style.display = "block";
-QRCode.toCanvas(qrCanvas, generateUpiLink(null, total.toFixed(2), flatNo, tokensSummary), function (error) {
-  if (error) console.error(error);
-});
-}, 2000);
-}
+  qrFallbackDiv.style.display = "block";
+  QRCode.toCanvas(qrCanvas, generateUpiLink(null, total.toFixed(2), flatNo, tokensSummary), function (error) {
+    if (error) console.error(error);
+  });
+}, 4000);
+
 
 
 // Event listeners for inputs to recalc total amount dynamically
