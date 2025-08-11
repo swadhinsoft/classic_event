@@ -306,10 +306,11 @@
       });
 
       const result = await response.json();
-      if (!result.success) {
-        alert("Error sending tokens email: " + (result.error || "Unknown error"));
-        return;
-      }
+     if (!result.success) {
+  console.error("Token email sending error details:", result);
+  alert("Error sending tokens email: " + (result.error || JSON.stringify(result) || "Unknown error"));
+  return;
+}
 
       // Open payment app via UPI link
       const upiLink = generateUpiLink(app, total.toFixed(2), flatNo, tokensSummary);
