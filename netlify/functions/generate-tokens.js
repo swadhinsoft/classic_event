@@ -1,49 +1,54 @@
-const QRCode = require("qrcode");
-const nodemailer = require("nodemailer");
+const nodemailer = require('nodemailer');
+const QRCode = require('qrcode');
 
 exports.handler = async (event) => {
   try {
-    const { block, flat, tokens, email } = JSON.parse(event.body);
-    const qrCodes = [];
+    const { blockNo, flatNo, numTokens, email } = JSON.parse(event.body);
 
-    for (let i = 0; i < Number(tokens); i++) {
-      const tokenData = `${block}-${flat}-${Date.now()}-${i + 1}`;
-      const qr = await QRCode.toDataURL(tokenData);
-      qrCodes.push(qr);
+    if (!blockNo || !flatNo || !numTokens || !email) {
+      return {
+        statusCode: 400,
+        body: JSON.stringify({ error: 'Missing required fields' })
+      };
     }
 
-    // Gmail SMTP transporter
+    // Generate QR codes
+    const qrImages = [];
+    for (let i = 0; i < numTokens; i++) {
+      const qrData = `Block: ${blockNo}, Flat: ${flatNo}, Token: ${i + 1}`;
+      const qrImage = await QRCode.toDataURL(qrData);
+      qrImages.push(qrImage);
+    }
+
+    // Create transporter using env variables
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+      host: process.env.SMTP_HOST,
+      port: Number(process.env.SMTP_PORT),
+      secure: process.env.SMTP_SECURE === 'true',
       auth: {
-        user: process.env.SMTP_USER, // swadhinsoft@gmail.com
-        pass: process.env.SMTP_PASS  // App-specific password
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASS
       }
     });
 
-    // Attach all QR codes
-    const attachments = qrCodes.map((qr, index) => ({
-      filename: `QR-Token-${index + 1}.png`,
-      content: qr.split("base64,")[1],
-      encoding: "base64"
-    }));
-
-    // Send the email
+    // Send email to recipient + CC to your Gmail
     await transporter.sendMail({
       from: `"Society QR" <${process.env.SMTP_USER}>`,
       to: email,
-      cc: process.env.SMTP_USER, // Send a copy to yourself
-      subject: "Your QR Tokens for Oceanus Classic Event",
-      text: "Here are your requested QR tokens. please find them attached. You can use these QR codes to claim your food tokens at the event.",
-      attachments
+      cc: process.env.SMTP_USER,
+      subject: 'Your QR Tokens',
+      html: `<p>Here are your QR codes:</p>${qrImages.map(src => `<img src="${src}"/>`).join('')}`
     });
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true, message: "QR codes sent via Gmail" }),
+      body: JSON.stringify({ message: 'QR codes sent successfully!' })
     };
-
-  } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Failed to send QR codes' })
+    };
   }
 };
