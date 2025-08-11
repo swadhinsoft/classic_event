@@ -3,9 +3,9 @@ const QRCode = require('qrcode');
 
 exports.handler = async (event) => {
   try {
-    const { blockNo, flatNo, numTokens, email } = JSON.parse(event.body);
+    const { eventName, blockNo, flatNo, numTokens, email } = JSON.parse(event.body);
 
-    if (!blockNo || !flatNo || !numTokens || !email) {
+    if (!eventName || !blockNo || !flatNo || !numTokens || !email) {
       return { statusCode: 400, body: JSON.stringify({ error: 'Missing required fields' }) };
     }
 
@@ -13,25 +13,17 @@ exports.handler = async (event) => {
     const attachments = [];
 
     for (let i = 0; i < numTokens; i++) {
-      const qrData = `Block: ${blockNo}, Flat: ${flatNo}, Token: ${i + 1}`;
-      const qrBuffer = await QRCode.toBuffer(qrData); // Get buffer for attachment
+      const qrData = `${eventName} - Block: ${blockNo}, Flat: ${flatNo}, Token: ${i + 1}`;
+      const qrBuffer = await QRCode.toBuffer(qrData);
       const filename = `token-${i + 1}.png`;
 
-      // Attachment
-      attachments.push({
-        filename,
-        content: qrBuffer
-      });
+      attachments.push({ filename, content: qrBuffer }); // download attachment
+      attachments.push({ filename: `inline-${filename}`, content: qrBuffer, cid: `qr${i}@tokens` }); // inline
 
-      // For inline display (CID reference)
-      attachments.push({
-        filename: `inline-${filename}`,
-        content: qrBuffer,
-        cid: `qr${i}@tokens` // unique content ID
-      });
-
-      // Add to HTML with CID
-      qrImages.push(`<img src="cid:qr${i}@tokens" style="margin:5px"/>`);
+      qrImages.push(`
+        <p><b>Person ${i + 1}:</b></p>
+        <img src="cid:qr${i}@tokens" style="margin:5px"/>
+      `);
     }
 
     const transporter = nodemailer.createTransport({
@@ -45,11 +37,18 @@ exports.handler = async (event) => {
     });
 
     await transporter.sendMail({
-      from: `"Society QR" <${process.env.SMTP_USER}>`,
+      from: `"${eventName}" <${process.env.SMTP_USER}>`,
       to: email,
       cc: process.env.SMTP_USER,
-      subject: 'Your QR Tokens',
-      html: `<p>Here are your QR codes:</p>${qrImages.join('')}`,
+      subject: `Thank you ${blockNo}-${flatNo} for your contribution to ${eventName}`,
+      html: `
+        <p>Dear Resident,</p>
+        <p>Thank you for contributing to <b>${eventName}</b>!</p>
+        <p>Here are your food tokens:</p>
+        ${qrImages.join('')}
+        <br>
+        <p>Regards,<br>Oceanus Classic Event Management Team</p>
+      `,
       attachments
     });
 

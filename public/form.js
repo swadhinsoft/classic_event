@@ -1,15 +1,19 @@
-document.getElementById("tokenForm").addEventListener("submit", async (e) => {
+document.getElementById("tokenForm").addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const formData = Object.fromEntries(new FormData(e.target).entries());
+  const data = {
+    eventName: document.getElementById("eventName").value,
+    blockNo: document.getElementById("blockNo").value,
+    flatNo: document.getElementById("flatNo").value,
+    numTokens: parseInt(document.getElementById("numTokens").value),
+    email: document.getElementById("email").value
+  };
 
   const res = await fetch("/.netlify/functions/generate-tokens", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(formData),
+    body: JSON.stringify(data)
   });
 
-  const data = await res.json();
-  document.getElementById("result").innerHTML =
-    data.qrCodes.map(qr => `<img src="${qr}" alt="QR Code" />`).join("");
+  const result = await res.json();
+  alert(result.message || result.error);
 });
