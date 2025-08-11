@@ -170,15 +170,14 @@
         <small><em>Veg Cutlet/Aloo Tikki, Puri, Chole, Kadhai Paneer, Veg pulav/Jeera Rice, Dal Tadka, Sweet, Kheer/moong dal halwa, Fryums/pickle (Satwik Food: All W/O Onion & Garlic)</em></small>
     </fieldset>
 
-
     <div id="totalAmount">Total Amount: ₹750.00</div>
 
     <button type="button" id="payPhonePe" title="Pay with PhonePe">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/1/1f/PhonePe_Logo.png" alt="PhonePe Logo" width="24" height="24" />
+        <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/phonepe-icon.png" alt="PhonePe Logo" width="24" height="24" />
         Pay with PhonePe
     </button>
     <button type="button" id="payGPay" title="Pay with Google Pay">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google Pay Logo" width="24" height="24" />
+        <img src="https://uxwing.com/wp-content/themes/uxwing/download/brands-and-social-media/google-pay-icon.png" alt="Google Pay Logo" width="24" height="24" />
         Pay with GPay
     </button>
 
@@ -196,8 +195,8 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
     const DAY1_PRICE = 125;
-const DAY2_PRICE = 115;
-const DAY3_PRICE = 325;
+    const DAY2_PRICE = 115;
+    const DAY3_PRICE = 325;
 
     const UPI_PA = "swadhinsoft-2@okaxis";
     const UPI_PN = "Swadhin Acharya";
@@ -218,19 +217,28 @@ const DAY3_PRICE = 325;
     const qrCanvas = document.getElementById("qrCanvas");
 
     function calculateTotal() {
-      const donation = Number(donationEl.value) || 0;
+      let donation = Number(donationEl.value);
+      if (donation < 750 || isNaN(donation)) {
+        donation = 750;
+        donationEl.value = donation;
+      }
+
       const day1Tokens = Number(day1TokensEl.value) || 0;
       const day2Tokens = Number(day2TokensEl.value) || 0;
       const day3Tokens = Number(day3TokensEl.value) || 0;
 
       const totalTokensCost =
-      day1Tokens * DAY1_PRICE +
-      day2Tokens * DAY2_PRICE +
-      day3Tokens * DAY3_PRICE;
+        day1Tokens * DAY1_PRICE +
+        day2Tokens * DAY2_PRICE +
+        day3Tokens * DAY3_PRICE;
       const total = donation + totalTokensCost;
 
       totalAmountEl.textContent = `Total Amount: ₹${total.toFixed(2)}`;
       return total;
+    }
+
+    function generateTokensSummary(day1Tokens, day2Tokens, day3Tokens) {
+      return `Day1:${day1Tokens} tokens, Day2:${day2Tokens} tokens, Day3:${day3Tokens} tokens`;
     }
 
     function encodeNote(flat, tokensSummary) {
@@ -249,56 +257,76 @@ const DAY3_PRICE = 325;
       }
     }
 
-    function generateTokensSummary(day1Tokens, day2Tokens, day3Tokens) {
-  return `Day1:${day1Tokens} tokens, Day2:${day2Tokens} tokens, Day3:${day3Tokens} tokens`;
-}
+async function handlePay(app) {
+  const block = blockEl.value;
+  const flat = flatEl.value;
+  const email = emailEl.value;
+  if (!block || !flat || !email) {
+    alert("Please fill all required fields (Block, Flat, Email)");
+    return;
+  }
+  const donation = Number(donationEl.value) || 0;
+  if (donation < 750) {
+    alert("Minimum donation is ₹750");
+    return;
+  }
+  const day1Tokens = Number(day1TokensEl.value) || 0;
+  const day2Tokens = Number(day2TokensEl.value) || 0;
+  const day3Tokens = Number(day3TokensEl.value) || 0;
 
-    function handlePay(app) {
-      const block = blockEl.value;
-      const flat = flatEl.value;
-      const email = emailEl.value;
-      if (!block || !flat || !email) {
-        alert("Please fill all required fields (Block, Flat, Email)");
-        return;
-      }
-      const donation = Number(donationEl.value) || 0;
-      if (donation < 750) {
-        alert("Minimum donation is ₹750");
-        return;
-      }
-      const day1Tokens = Number(day1TokensEl.value) || 0;
-      const day2Tokens = Number(day2TokensEl.value) || 0;
-      const day3Tokens = Number(day3TokensEl.value) || 0;
+  if (day1Tokens + day2Tokens + day3Tokens === 0) {
+    alert("Please select at least one token for any day");
+    return;
+  }
 
-      if (day1Tokens + day2Tokens + day3Tokens === 0) {
-        alert("Please select at least one token for any day");
-        return;
-      }
-
-      const flatNo = `${block}-${flat}`;
+  const flatNo = `${block}-${flat}`;
   const tokensSummary = generateTokensSummary(day1Tokens, day2Tokens, day3Tokens);
   const total = donation + day1Tokens * DAY1_PRICE + day2Tokens * DAY2_PRICE + day3Tokens * DAY3_PRICE;
 
-      // Open payment app
-      const upiLink = generateUpiLink(app, total.toFixed(2), flatNo, tokensSummary);
-      qrFallbackDiv.style.display = "none";
-      window.location.href = upiLink;
+  // Send data to backend to generate and email QR tokens
+  const response = await fetch("/.netlify/functions/generate-tokens", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      block,
+      flat,
+      email,
+      donation,
+      day1Tokens,
+      day2Tokens,
+      day3Tokens
+    })
+  });
 
-      // Show fallback QR if app not opening
-      setTimeout(() => {
-        qrFallbackDiv.style.display = "block";
-        QRCode.toCanvas(qrCanvas, generateUpiLink(null, total.toFixed(2), flatNo, tokensSummary), function (error) {
-          if (error) console.error(error);
-        });
-      }, 2000);
-    }
+  const result = await response.json();
+  if (!result.success) {
+    alert("Error sending tokens email: " + (result.error || "Unknown error"));
+    return;
+  }
 
-    // Calculate total on input change
-    donationEl.addEventListener("input", calculateTotal);
-    day1TokensEl.addEventListener("input", calculateTotal);
-    day2TokensEl.addEventListener("input", calculateTotal);
-    day3TokensEl.addEventListener("input", calculateTotal);
-    donationEl.addEventListener("blur", () => {
+  // Open payment app via UPI link
+  const upiLink = generateUpiLink(app, total.toFixed(2), flatNo, tokensSummary);
+  qrFallbackDiv.style.display = "none";
+  window.location.href = upiLink;
+
+  // Show fallback QR code if payment app doesn't open within 2 seconds
+  setTimeout(() => {
+    qrFallbackDiv.style.display = "block";
+    QRCode.toCanvas(qrCanvas, generateUpiLink(null, total.toFixed(2), flatNo, tokensSummary), function (error) {
+      if (error) console.error(error);
+    });
+  }, 2000);
+
+}
+
+// Event listeners for inputs to recalc total amount dynamically
+donationEl.addEventListener("input", calculateTotal);
+day1TokensEl.addEventListener("input", calculateTotal);
+day2TokensEl.addEventListener("input", calculateTotal);
+day3TokensEl.addEventListener("input", calculateTotal);
+
+// Ensure donation min value on blur
+donationEl.addEventListener("blur", () => {
   let val = Number(donationEl.value);
   if (val < 750 || isNaN(val)) {
     donationEl.value = 750;
@@ -306,10 +334,12 @@ const DAY3_PRICE = 325;
   calculateTotal();
 });
 
-    payPhonePeBtn.addEventListener("click", () => handlePay("phonepe"));
-    payGPayBtn.addEventListener("click", () => handlePay("gpay"));
+// Payment buttons event listeners
+payPhonePeBtn.addEventListener("click", () => handlePay("phonepe"));
+payGPayBtn.addEventListener("click", () => handlePay("gpay"));
 
-    calculateTotal();
+// Initial total calculation on page load
+calculateTotal();
 </script>
 </body>
 </html>
