@@ -234,8 +234,8 @@
         day1Tokens * DAY1_PRICE +
         day2Tokens * DAY2_PRICE +
         day3Tokens * DAY3_PRICE;
-      const total = donation + totalTokensCost;
 
+      const total = donation + totalTokensCost;
       totalAmountEl.textContent = `Total Amount: ₹${total.toFixed(2)}`;
       return total;
     }
@@ -260,100 +260,88 @@
       }
     }
 
-async function handlePay(app) {
-const block = blockEl.value;
-const flat = flatEl.value;
-const email = emailEl.value;
-if (!block || !flat || !email) {
-alert("Please fill all required fields (Block, Flat, Email)");
-return;
-}
-const donation = Number(donationEl.value) || 0;
-if (donation < 750) {
-alert("Minimum donation is ₹750");
-return;
-}
-const day1Tokens = Number(day1TokensEl.value) || 0;
-const day2Tokens = Number(day2TokensEl.value) || 0;
-const day3Tokens = Number(day3TokensEl.value) || 0;
-
-if (day1Tokens + day2Tokens + day3Tokens === 0) {
-alert("Please select at least one token for any day");
-return;
-}
-
-const flatNo = `${block}-${flat}`;
-const tokensSummary = generateTokensSummary(day1Tokens, day2Tokens, day3Tokens);
-const total = donation + day1Tokens * DAY1_PRICE + day2Tokens * DAY2_PRICE + day3Tokens * DAY3_PRICE;
-
-// Send data to backend to generate and email QR tokens
-const response = await fetch("/.netlify/functions/generate-tokens", {
-method: "POST",
-headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-  eventName: "Ganesh Puja 2025",
-  blockNo: block,
-  flatNo: flat,
-  email: email,
-  baseDonation: donation,
-  extraDonation: 0,
-  days: {
-    "1": day1Tokens,
-    "2": day2Tokens,
-    "3": day3Tokens
-  },
-  totalAmount: total,
-  paymentNote: `Ganesh Puja 2025 | Flat: ${block}-${flat} | Day1: ${day1Tokens} tokens, Day2: ${day2Tokens} tokens, Day3: ${day3Tokens} tokens`
-})
-});
-
-const result = await response.json();
-
-if (!response.ok) {
-alert("Error sending tokens email: " + (result.error || "Unknown error"));
-console.error("Token email sending error details:", result);
-return;
-}
-
-const upiLink = generateUpiLink(app, total.toFixed(2), flatNo, tokensSummary);
-console.log("Opening UPI link:", upiLink);
-
-qrFallbackDiv.style.display = "none";
-
-// Try window.open to trigger app
-window.open(upiLink);
-
-// Optional: fallback QR code can show after 3-4 seconds if app not opened
-setTimeout(() => {
-  qrFallbackDiv.style.display = "block";
-  QRCode.toCanvas(qrCanvas, generateUpiLink(null, total.toFixed(2), flatNo, tokensSummary), function (error) {
-    if (error) console.error(error);
-  });
-}, 4000);
+    async function handlePay(app) {
+      const block = blockEl.value;
+      const flat = flatEl.value;
+      const email = emailEl.value;
+      if (!block || !flat || !email) {
+        alert("Please fill all required fields (Block, Flat, Email)");
+        return;
+      }
+      const donation = Number(donationEl.value) || 0;
+      if (donation < 750) {
+        alert("Minimum donation is ₹750");
+        return;
+      }
+      const day1Tokens = Number(day1TokensEl.value) || 0;
+      const day2Tokens = Number(day2TokensEl.value) || 0;
+      const day3Tokens = Number(day3TokensEl.value) || 0;
 
 
 
-// Event listeners for inputs to recalc total amount dynamically
-donationEl.addEventListener("input", calculateTotal);
-day1TokensEl.addEventListener("input", calculateTotal);
-day2TokensEl.addEventListener("input", calculateTotal);
-day3TokensEl.addEventListener("input", calculateTotal);
+      const flatNo = `${block}-${flat}`;
+      const tokensSummary = generateTokensSummary(day1Tokens, day2Tokens, day3Tokens);
+      const total = calculateTotal();
 
-// Ensure donation min value on blur
-donationEl.addEventListener("blur", () => {
-  let val = Number(donationEl.value);
-  if (val < 750 || isNaN(val)) {
-    donationEl.value = 750;
-  }
-  calculateTotal();
-});
+      // Send data to backend
+      const response = await fetch("/.netlify/functions/generate-tokens", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          eventName: "Ganesh Puja 2025",
+          blockNo: block,
+          flatNo: flat,
+          email: email,
+          baseDonation: donation,
+          extraDonation: 0,
+          days: {
+            "1": day1Tokens,
+            "2": day2Tokens,
+            "3": day3Tokens
+          },
+          totalAmount: total,
+          paymentNote: `Ganesh Puja 2025 | Flat: ${block}-${flat} | Day1: ${day1Tokens} tokens, Day2: ${day2Tokens} tokens, Day3: ${day3Tokens} tokens`
+        })
+      });
 
-// Payment buttons event listeners
-payPhonePeBtn.addEventListener("click", () => handlePay("phonepe"));
-payGPayBtn.addEventListener("click", () => handlePay("gpay"));
+      const result = await response.json();
+      if (!response.ok) {
+        alert("Error sending tokens email: " + (result.error || "Unknown error"));
+        console.error("Token email sending error details:", result);
+        return;
+      }
 
-// Initial total calculation on page load
-calculateTotal();
+      const upiLink = generateUpiLink(app, total.toFixed(2), flatNo, tokensSummary);
+      qrFallbackDiv.style.display = "none";
+      window.open(upiLink);
+
+      setTimeout(() => {
+        qrFallbackDiv.style.display = "block";
+        QRCode.toCanvas(qrCanvas, generateUpiLink(null, total.toFixed(2), flatNo, tokensSummary), function (error) {
+          if (error) console.error(error);
+        });
+      }, 4000);
+    }
+
+    // ✅ Event listeners moved out so total updates LIVE
+    donationEl.addEventListener("input", calculateTotal);
+    day1TokensEl.addEventListener("input", calculateTotal);
+    day2TokensEl.addEventListener("input", calculateTotal);
+    day3TokensEl.addEventListener("input", calculateTotal);
+
+    donationEl.addEventListener("blur", () => {
+      let val = Number(donationEl.value);
+      if (val < 750 || isNaN(val)) {
+        donationEl.value = 750;
+      }
+      calculateTotal();
+    });
+
+    payPhonePeBtn.addEventListener("click", () => handlePay("phonepe"));
+    payGPayBtn.addEventListener("click", () => handlePay("gpay"));
+
+    // Initial calculation
+    calculateTotal();
 </script>
 </body>
 </html>
